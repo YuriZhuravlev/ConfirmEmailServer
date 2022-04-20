@@ -6,5 +6,5 @@ data class GetMessage(
     @SerializedName("message")
     val message: String,
     @SerializedName("to")
-    val to: String?
+    val to: String
 )
