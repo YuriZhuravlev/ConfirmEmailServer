@@ -32,7 +32,12 @@ fun Application.configureSockets() {
                             if (this !in connections.keys) {
                                 // create connection
                                 val name = frame.readText()
-                                connections += this to name
+                                if (connections.values.contains(name)) {
+                                    // имя уже занято
+                                    application.log.info("Name Taken $name!")
+                                    close(CloseReason(CloseReason.Codes.NORMAL, socketService.errorNameTaken()))
+                                } else
+                                    connections += this to name
                             } else {
                                 connections[this]?.let { name ->
                                     socketService.proceed(owner = name, text = frame.readText()) { to, text ->

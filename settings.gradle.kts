@@ -1,1 +1,1 @@
-rootProject.name = "yuri.zhuravlev.serversocket"
+rootProject.name = "ServerSocket"

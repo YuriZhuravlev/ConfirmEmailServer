@@ -29,5 +29,6 @@ object SocketService {
         }
     }
 
+    fun errorNameTaken(): String = gson.toJson(ErrorMessage("Данное имя уже занято"))
     fun errorNotFound(): String = gson.toJson(ErrorMessage("Пользователь не найден"))
 }
