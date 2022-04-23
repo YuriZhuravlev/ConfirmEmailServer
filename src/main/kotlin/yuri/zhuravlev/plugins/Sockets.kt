@@ -45,8 +45,14 @@ fun Application.configureSockets() {
                                         (connections.forEach { (connection, name) ->
                                             if (name == to) {
                                                 find = true
-                                                application.log.debug("${connections[this]} <- $text")
-                                                connection.send(text)
+                                                try {
+                                                    application.log.debug("$to <- $text")
+                                                    connection.send(text)
+                                                } catch (e: Exception) {
+                                                    val error = socketService.errorNotFound()
+                                                    application.log.debug("$name <- $error")
+                                                    send(error)
+                                                }
                                                 return@forEach
                                             }
                                         })
@@ -74,6 +80,7 @@ fun Application.configureSockets() {
             } catch (e: Throwable) {
                 application.log.error("onError ${closeReason.await()}")
                 e.printStackTrace()
+                connections.remove(this)
             }
         }
 
