@@ -8,6 +8,7 @@ import yuri.zhuravlev.model.SendMessage
 
 object SocketService {
     private val gson = Gson()
+    private const val SERVER = "server"
 
     suspend fun proceed(
         owner: String,
@@ -31,4 +32,5 @@ object SocketService {
 
     fun errorNameTaken(): String = gson.toJson(ErrorMessage("Данное имя уже занято"))
     fun errorNotFound(): String = gson.toJson(ErrorMessage("Пользователь не найден"))
+    fun SuccessName(name: String): String = gson.toJson(SendMessage(name, SERVER))
 }

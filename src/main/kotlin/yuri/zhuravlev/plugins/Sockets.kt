@@ -6,6 +6,7 @@ import io.ktor.server.routing.*
 import io.ktor.server.websocket.*
 import io.ktor.websocket.*
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
+import kotlinx.coroutines.isActive
 import yuri.zhuravlev.data.SocketService
 import java.time.Duration
 import java.util.*
@@ -32,12 +33,24 @@ fun Application.configureSockets() {
                             if (this !in connections.keys) {
                                 // create connection
                                 val name = frame.readText()
-                                if (connections.values.contains(name)) {
+                                var find = false
+                                connections.forEach { (key, value) ->
+                                    if (value == name) {
+                                        if (key.isActive)
+                                            find = true
+                                        else
+                                            connections.remove(key)
+                                        return@forEach
+                                    }
+                                }
+                                if (find) {
                                     // имя уже занято
                                     application.log.info("Name Taken $name!")
                                     close(CloseReason(CloseReason.Codes.NORMAL, socketService.errorNameTaken()))
-                                } else
+                                } else {
                                     connections += this to name
+                                    send(SocketService.SuccessName(name))
+                                }
                             } else {
                                 connections[this]?.let { name ->
                                     socketService.proceed(owner = name, text = frame.readText()) { to, text ->
@@ -49,6 +62,8 @@ fun Application.configureSockets() {
                                                     application.log.debug("$to <- $text")
                                                     connection.send(text)
                                                 } catch (e: Exception) {
+                                                    application.log.debug("$to send error: ${e.message}")
+                                                    connections.remove(connection)
                                                     val error = socketService.errorNotFound()
                                                     application.log.debug("$name <- $error")
                                                     send(error)
@@ -80,7 +95,6 @@ fun Application.configureSockets() {
             } catch (e: Throwable) {
                 application.log.error("onError ${closeReason.await()}")
                 e.printStackTrace()
-                connections.remove(this)
             }
         }
 
