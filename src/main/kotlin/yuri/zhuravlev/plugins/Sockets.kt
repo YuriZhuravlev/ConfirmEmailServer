@@ -46,7 +46,8 @@ fun Application.configureSockets() {
                                 if (find) {
                                     // имя уже занято
                                     application.log.info("Name Taken $name!")
-                                    close(CloseReason(CloseReason.Codes.NORMAL, socketService.errorNameTaken()))
+                                    send(socketService.errorNameTaken())
+                                    close()
                                 } else {
                                     connections += this to name
                                     send(SocketService.SuccessName(name))
