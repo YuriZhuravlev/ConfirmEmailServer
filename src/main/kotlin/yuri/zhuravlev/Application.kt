@@ -1,12 +1,13 @@
 package yuri.zhuravlev
 
-import io.ktor.server.application.*
+import io.ktor.server.engine.*
+import io.ktor.server.netty.*
 import yuri.zhuravlev.plugins.configureMonitoring
 import yuri.zhuravlev.plugins.configureSockets
 
-fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
-
-fun Application.module(testing: Boolean = false) {
-    configureSockets()
-    configureMonitoring()
+fun main() {
+    embeddedServer(Netty, port = (System.getenv("PORT") ?: "8080").toInt()) {
+        configureSockets()
+        configureMonitoring()
+    }.start(wait = true)
 }
